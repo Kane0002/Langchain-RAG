@@ -12,7 +12,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 
 # Set the OpenAI API key from Streamlit secrets
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
 
 @st.cache_resource
 def load_pdf(_file):
