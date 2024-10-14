@@ -13,19 +13,20 @@
 
 ## 시작하기
 **1. 가상환경을 만듭니다.**
-   ```
+   ```bash
    conda create -n [가상환경 이름] python=3.12
    ```
 **2. 저장소를 클론합니다:**
-   ```
+   ```bash
    git clone https://github.com/Kane0002/Langchain-RAG.git
    ```
 
 **3. 필요한 패키지를 설치합니다:**
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
-
+- 이 코드를 실행하면 각 실습 장의 필수 라이브러리를 설치하지 않아도 됩니다.
+- 실습 파일마다 필수 라이브러리를 표시한 이유는, 해당 섹션만 실습을 진행하고자 할 때를 위함입니다.
 **4. Jupyter Notebook을 실행하여 각 장의 내용을 확인하고 실습할 수 있습니다.**
 
 ## 주의사항
