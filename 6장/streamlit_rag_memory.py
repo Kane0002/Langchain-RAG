@@ -11,15 +11,16 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories.streamlit import StreamlitChatMessageHistory
 
-# Set the OpenAI API key from Streamlit secrets
+#오픈AI API 키 설정
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 
+#cache_resource로 한번 실행한 결과 캐싱해두기
 @st.cache_resource
 def load_and_split_pdf(file_path):
     loader = PyPDFLoader(file_path)
     return loader.load_and_split()
 
-# Create a vector store from the document chunks
+#텍스트 청크들을 Chroma 안에 임베딩 벡터로 저장
 @st.cache_resource
 def create_vector_store(_docs):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -32,6 +33,7 @@ def create_vector_store(_docs):
     )
     return vectorstore
 
+#만약 기존에 저장해둔 ChromaDB가 있는 경우, 이를 로드
 @st.cache_resource
 def get_vectorstore(_docs):
     persist_directory = "./chroma_db"
@@ -43,7 +45,7 @@ def get_vectorstore(_docs):
     else:
         return create_vector_store(_docs)
     
-# Initialize the LangChain components
+# PDF 문서 로드-벡터 DB 저장-검색기-히스토리 모두 합친 Chain 구축
 @st.cache_resource
 def initialize_components(selected_model):
     file_path = r"../data/대한민국헌법(헌법)(제00010호)(19880225).pdf"
@@ -51,7 +53,7 @@ def initialize_components(selected_model):
     vectorstore = get_vectorstore(pages)
     retriever = vectorstore.as_retriever()
 
-    # Define the contextualize question prompt
+    # 채팅 히스토리 요약 시스템 프롬프트
     contextualize_q_system_prompt = """Given a chat history and the latest user question \
     which might reference context in the chat history, formulate a standalone question \
     which can be understood without the chat history. Do NOT answer the question, \
@@ -64,7 +66,7 @@ def initialize_components(selected_model):
         ]
     )
 
-    # Define the answer question prompt
+    # 질문-답변 시스템 프롬프트
     qa_system_prompt = """You are an assistant for question-answering tasks. \
     Use the following pieces of retrieved context to answer the question. \
     If you don't know the answer, just say that you don't know. \
