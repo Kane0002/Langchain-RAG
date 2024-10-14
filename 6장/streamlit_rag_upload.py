@@ -10,52 +10,43 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
+#Chroma tenant 오류 방지 위한 코드
+import chromadb
+chromadb.api.client.SharedSystemClient.clear_system_cache()
 
-# Set the OpenAI API key from Streamlit secrets
+#오픈AI API 키 설정
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
+
+#cache_resource로 한번 실행한 결과 캐싱해두기
 @st.cache_resource
 def load_pdf(_file):
     with tempfile.NamedTemporaryFile(mode="wb", delete=False) as tmp_file:
         tmp_file.write(_file.getvalue())
         tmp_file_path = tmp_file.name
-        # Load the data from the file using Langchain
+        #PDF 파일 업로드
         loader = PyPDFLoader(file_path=tmp_file_path)
         pages = loader.load_and_split()
     return pages
 
-# Create a vector store from the document chunks
+#텍스트 청크들을 Chroma 안에 임베딩 벡터로 저장
 @st.cache_resource
 def create_vector_store(_docs):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     split_docs = text_splitter.split_documents(_docs)
-    persist_directory = "./upload"
-    vectorstore = Chroma.from_documents(
-        split_docs, 
-        OpenAIEmbeddings(model='text-embedding-3-small'),
-        persist_directory=persist_directory
-    )
+    vectorstore = Chroma.from_documents(split_docs, OpenAIEmbeddings(model='text-embedding-3-small'))
     return vectorstore
-@st.cache_resource
-def get_vectorstore(_docs):
-    persist_directory = "./upload"
-    if os.path.exists(persist_directory):
-        return Chroma(
-            persist_directory=persist_directory,
-            embedding_function=OpenAIEmbeddings(model='text-embedding-3-small')
-        )
-    else:
-        return create_vector_store(_docs)
-    
+
+#검색된 문서를 하나의 텍스트로 합치는 헬퍼 함수
 def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-# Initialize the LangChain components
+#PDF 문서 기반 RAG 체인 구축
 @st.cache_resource
 def chaining(_pages):
-    vectorstore = get_vectorstore(_pages)
+    vectorstore = create_vector_store(_pages)
     retriever = vectorstore.as_retriever()
 
-    # Define the answer question prompt
+    #이 부분의 시스템 프롬프트는 기호에 따라 변경하면 됩니다.
     qa_system_prompt = """
     You are an assistant for question-answering tasks. \
     Use the following pieces of retrieved context to answer the question. \
@@ -72,7 +63,7 @@ def chaining(_pages):
         ]
     )
 
-    llm = ChatOpenAI(model="gpt-4o-mini")
+    llm = ChatOpenAI(model="gpt-4o")
     rag_chain = (
         {"context": retriever | format_docs, "input": RunnablePassthrough()}
         | qa_prompt
