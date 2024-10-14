@@ -9,7 +9,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-# Set the OpenAI API key from Streamlit secrets
+#오픈AI API 키 설정
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 
 @st.cache_resource
@@ -17,7 +17,7 @@ def load_and_split_pdf(file_path):
     loader = PyPDFLoader(file_path)
     return loader.load_and_split()
 
-# Create a vector store from the document chunks
+#텍스트 청크들을 Chroma 안에 임베딩 벡터로 저장
 @st.cache_resource
 def create_vector_store(_docs):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -30,6 +30,7 @@ def create_vector_store(_docs):
     )
     return vectorstore
 
+#만약 기존에 저장해둔 ChromaDB가 있는 경우, 이를 로드
 @st.cache_resource
 def get_vectorstore(_docs):
     persist_directory = "./chroma_db"
