@@ -30,7 +30,7 @@
 **4. Jupyter Notebook을 실행하여 각 장의 내용을 확인하고 실습할 수 있습니다.**
 
 ## 주의사항
-**1. 오픈소스 LLM 실습 진행 과정 중 torch 설치 필수**
+**1. Window OS 환경에서 오픈소스 LLM 실습 진행을 위한 torch 설치**
 - 5장의 Basic RAG.ipynb에는 오픈소스LLM 기반 RAG 실습 파일이 포함되어 있습니다.
 - 해당 실습 진행을 위해서는 PC 내 GPU CUDA 환경에 알맞는 torch 설치가 필요합니다.
 - 현재 저자의 GPU RTX 4060의 경우 다음과 같은 설치 과정을 거쳤습니다.
